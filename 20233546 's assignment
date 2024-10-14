@@ -1,0 +1,97 @@
+
+
+
+Bài 2
+// Hàm tìm tất cả các số nguyên tố nhỏ hơn N
+so<int> tat_ca_snt_nho_hon_N(int N) {
+    so<bool> la_snt(N + 1, true);
+    la_snt[0] = la_snt[1] = false; // 0 và 1 không phải là số nguyên tố
+    for (int p = 2; p * p <= N; p++) {
+        if (la_snt[p]) {
+            for (int i = p * p; i <= N; i += p) {
+                la_snt[i] = false;
+            }
+        }
+    }
+    
+    so<int> NT;
+    for (int p = 2; p < N; p++) {
+        if (la_snt[p]) {
+            NT.push_back(p);
+        }
+    }
+    return NT;
+}
+
+// Hàm tạo ra các số Blum nhỏ hơn N
+so<int> tao_ra_so_Blum_nho_hon_N(int N) {
+    so<int> NT = tat_ca_snt_nho_hon_N(N);
+    set<int> so_Blum;
+
+    for (size_t i = 0; i < NT.size(); i++) {
+        for (size_t j = i + 1; j < NT.size(); j++) {
+            int product = NT[i] * NT[j];
+            if (product < N) {
+                so_Blum.insert(product);
+            } else {
+                break;
+            }
+        }
+    }
+
+    return so<int>(so_Blum.begin(), so_Blum.end());
+}
+
+// Hàm tìm các cặp số Blum có tổng cũng là số Blum
+so<cap_so<int, int>> cap_so_Blum(const so<int>& so_Blum) {
+    set<int> blum_set(so_Blum.begin(), so_Blum.end());
+    so<cap_so<int, int>> so_Blum;
+
+    for (size_t i = 0; i < so_Blum.size(); i++) {
+        for (size_t j = i; j < so_Blum.size(); j++) {
+            int cap_so_sum = so_Blum[i] + so_Blum[j];
+            if (blum_set.find(cap_so_sum) != blum_set.end()) {
+                blum_pairs.push_back(make_pair(so_Blum[i], so_Blum[j]));
+            }
+        }
+    }
+
+    return blum_pairs;
+}
+
+// Hàm kiểm tra sự tồn tại của số Blum M
+bool is_blum_number(const vector<int>& blum_numbers, int M) {
+    return find(blum_numbers.begin(), blum_numbers.end(), M) != blum_numbers.end();
+}
+
+int main() {
+    int N;
+    cout << "Nhập số N: ";
+    cin >> N;
+
+    vector<int> blum_numbers = generate_blum_numbers(N);
+    cout << "Danh sách số Blum nhỏ hơn N: ";
+    for (int num : blum_numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    // Tìm cặp số Blum
+    vector<pair<int, int>> blum_pairs = find_blum_pairs(blum_numbers);
+    cout << "Cặp số Blum có tổng là số Blum:" << endl;
+    for (const auto& pair : blum_pairs) {
+        cout << "(" << pair.first << ", " << pair.second << ")" << endl;
+    }
+
+    // Kiểm tra sự tồn tại của số Blum M
+    int M;
+    cout << "Nhập số M để kiểm tra: ";
+    cin >> M;
+    if (is_blum_number(blum_numbers, M)) {
+        cout << "Số " << M << " là số Blum." << endl;
+    } else {
+        cout << "Số " << M << " không phải là số Blum." << endl;
+    }
+
+    return 0;
+}
