@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+#define MAX_YEARS 100
+
+int main() {
+    int years[MAX_YEARS];
+    int birth_counts[MAX_YEARS];
+    int n;
+
+    // Nhập số năm
+    printf("Nhập số năm: ");
+    scanf("%d", &n);
+
+    // Nhập dữ liệu
+    for (int i = 0; i < n; i++) {
+        printf("Nhập năm thứ %d: ", i + 1);
+        scanf("%d", &years[i]);
+        printf("Nhập số lượng người sinh ra trong năm %d: ", years[i]);
+        scanf("%d", &birth_counts[i]);
+    }
+
+    // Tìm số năm có cùng số lượng người sinh ra
+    int max_births = birth_counts[0];
+    int min_births = birth_counts[0];
+    for (int i = 1; i < n; i++) {
+        if (birth_counts[i] > max_births) {
+            max_births = birth_counts[i];
+        }
+        if (birth_counts[i] < min_births) {
+            min_births = birth_counts[i];
+        }
+    }
+
+    // In ra các năm có số lượng sinh ra lớn nhất và bé nhất
+    printf("Năm có số lượng người sinh ra lớn nhất là: ");
+    for (int i = 0; i < n; i++) {
+        if (birth_counts[i] == max_births) {
+            printf("%d ", years[i]);
+        }
+    }
+    printf("với %d người.\n", max_births);
+
+    printf("Năm có số lượng người sinh ra bé nhất là: ");
+    for (int i = 0; i < n; i++) {
+        if (birth_counts[i] == min_births) {
+            printf("%d ", years[i]);
+        }
+    }
+    printf("với %d người.\n", min_births);
+
+    return 0;
+}
