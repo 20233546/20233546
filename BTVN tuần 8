@@ -1,0 +1,74 @@
+#include <iostream>
+
+struct Node {
+    int coeff;   // Hệ số
+    int power;   // Bậc
+    Node* next;  // Con trỏ đến phần tử tiếp theo
+
+    Node(int c, int p) : coeff(c), power(p), next(nullptr) {}
+};
+class Poly {
+private:
+    Node* head;
+
+public:
+    Poly() : head(nullptr) {}
+
+    void addTerm(int coeff, int power) {
+        if (coeff == 0) return;  // Không thêm nếu hệ số bằng 0
+
+        Node* newNode = new Node(coeff, power);
+        if (!head || head->power < power) {
+            newNode->next = head;
+            head = newNode;
+            return;
+        }
+
+        Node* current = head;
+        while (current->next && current->next->power > power) {
+            current = current->next;
+        }
+
+        if (current->power == power) {
+            current->coeff += coeff;
+            delete newNode; // Giải phóng cấp phát nếu hệ số = 0
+            if (current->coeff == 0) {
+                Node* temp = current;
+                current = current->next;
+                delete temp; // Giải phóng nút nếu hệ số = 0
+            }
+        } else {
+            newNode->next = current->next;
+            current->next = newNode;
+        }
+    }
+
+    void print() const {
+        Node* current = head;
+        while (current) {
+            std::cout << current->coeff << "x^" << current->power;
+            if (current->next) std::cout << " + ";
+            current = current->next;
+        }
+        std::cout << std::endl;
+    }
+
+    ~Poly() {
+        while (head) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+int main() {
+    Poly p;
+    p.addTerm(3, 4);
+    p.addTerm(5, 2);
+    p.addTerm(0, 3); // Không thêm
+    p.addTerm(2, 4); // Hệ số 3 + 2 = 5 cho bậc 4
+    p.addTerm(-5, 2); // Hệ số 5 - 5 = 0 cho bậc 2
+
+    p.print(); // In ra đa thức
+    return 0;
+}
