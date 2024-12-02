@@ -1,0 +1,50 @@
+class Node:
+    def __init__(self, giỏ_hàng, số_tiền, sản_phẩm):
+        self.giỏ_hàng = giỏ_hàng  # Tên giỏ hàng (hoặc tên khách hàng)
+        self.số_tiền = số_tiền    # Tổng số tiền trong giỏ hàng
+        self.sản_phẩm = sản_phẩm  # Danh sách sản phẩm (mỗi sản phẩm là 1 tuple (tên sản phẩm, số lượng))
+        self.next = None           # Liên kết đến phần tử tiếp theo trong hàng đợi
+
+class Queue:
+    def __init__(self):
+        self.front = None  # Đầu hàng đợi
+        self.rear = None   # Cuối hàng đợi
+
+    # Thêm một khách hàng vào hàng đợi
+    def enqueue(self, giỏ_hàng, số_tiền, sản_phẩm):
+        new_node = Node(giỏ_hàng, số_tiền, sản_phẩm)
+        if not self.rear:
+            self.front = self.rear = new_node
+            return
+        self.rear.next = new_node
+        self.rear = new_node
+
+    # Loại bỏ khách hàng đã thanh toán khỏi hàng đợi
+    def dequeue(self):
+        if not self.front:
+            return None
+        removed_node = self.front
+        self.front = self.front.next
+        if not self.front:
+            self.rear = None
+        return removed_node
+
+    # Tính tổng số tiền thu được từ tất cả các giỏ hàng trong hàng đợi
+    def tổng_số_tiền(self):
+        total = 0
+        current = self.front
+        while current:
+            total += current.số_tiền
+            current = current.next
+        return total
+
+    # Xác định số lượng của sản phẩm A đã bán trong tất cả các giỏ hàng
+    def số_lượng_sản_phẩm(self, sản_phẩm_A):
+        total_quantity = 0
+        current = self.front
+        while current:
+            for sản_phẩm, số_lượng in current.sản_phẩm:
+                if sản_phẩm == sản_phẩm_A:
+                    total_quantity += số_lượng
+            current = current.next
+        return total_quantity
