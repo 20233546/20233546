@@ -1,0 +1,154 @@
+//1. Khai báo cây
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class Node {
+public:
+    string name;  // Tên của mục (chapter, section, etc.)
+    int page_number;  // Số trang bắt đầu của mục
+    vector<Node*> children;  // Các mục con
+    int max_children;  // Số mục con tối đa
+
+    // Constructor
+    Node(string n, int p, int max_c = 5) : name(n), page_number(p), max_children(max_c) {}
+
+    // Thêm mục con vào node nếu node chưa đầy
+    bool addChild(Node* child) {
+        if (children.size() < max_children) {
+            children.push_back(child);
+            return true;
+        }
+        return false;  // Nếu node đã đầy
+    }
+
+    // Kiểm tra xem node có đầy không
+    bool isFull() {
+        return children.size() >= max_children;
+    }
+};
+//2. Xác định số chương của cuốn sách
+int countChapters(Node* root) {
+    if (root == nullptr) return 0;
+    
+    int chapterCount = 0;
+
+    // Kiểm tra nếu node là một chapter
+    if (root->name.find("chapter") != string::npos) {
+        chapterCount++;
+    }
+
+    // Đệ quy đếm số chương ở các mục con
+    for (Node* child : root->children) {
+        chapterCount += countChapters(child);
+    }
+
+    return chapterCount;
+}
+//3.Tìm chương dài nhất
+int totalPages(Node* node) {
+    int total = node->page_number;
+
+    // Tính tổng số trang cho tất cả các mục con
+    for (Node* child : node->children) {
+        total += totalPages(child);
+    }
+
+    return total;
+}
+
+Node* findLongestChapter(Node* root) {
+    if (root == nullptr) return nullptr;
+    
+    Node* longestChapter = nullptr;
+    int maxPages = 0;
+
+    // Kiểm tra nếu node là một chapter
+    if (root->name.find("chapter") != string::npos) {
+        int chapterPages = totalPages(root);
+        if (chapterPages > maxPages) {
+            maxPages = chapterPages;
+            longestChapter = root;
+        }
+    }
+
+    // Đệ quy tìm chương dài nhất ở các mục con
+    for (Node* child : root->children) {
+        Node* candidate = findLongestChapter(child);
+        if (candidate) {
+            int candidatePages = totalPages(candidate);
+            if (candidatePages > maxPages) {
+                maxPages = candidatePages;
+                longestChapter = candidate;
+            }
+        }
+    }
+
+    return longestChapter;
+}
+//4. Tìm và xóa mục
+bool deleteNode(Node* root, const string& targetName) {
+    if (root == nullptr) return false;
+
+    // Duyệt qua các mục con và xoá mục cần tìm
+    for (auto it = root->children.begin(); it != root->children.end(); ) {
+        if ((*it)->name == targetName) {
+            // Xoá node khỏi danh sách con
+            it = root->children.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    // Đệ quy xoá ở các mục con của root
+    for (Node* child : root->children) {
+        deleteNode(child, targetName);
+    }
+
+    return true;
+}
+
+int main() {
+    // Tạo các node
+    Node* chapter1 = new Node("Chapter 1: Introduction", 1);
+    Node* section1_1 = new Node("Section 1.1: Basics", 2);
+    Node* subsection1_1_1 = new Node("Subsection 1.1.1: Details", 3);
+    Node* chapter2 = new Node("Chapter 2: Advanced Topics", 10);
+    Node* section2_1 = new Node("Section 2.1: Advanced Basics", 11);
+
+    // Thêm các mục con
+    chapter1->addChild(section1_1);
+    section1_1->addChild(subsection1_1_1);
+    chapter2->addChild(section2_1);
+
+    // Tạo cuốn sách với root là chapter1
+    Node* bookRoot = chapter1;
+    chapter1->addChild(chapter2);
+
+    // 1. Đếm số chương trong sách
+    cout << "Number of chapters: " << countChapters(bookRoot) << endl;
+
+    // 2. Tìm chương dài nhất
+    Node* longestChapter = findLongestChapter(bookRoot);
+    cout << "Longest chapter: " << longestChapter->name << " with " 
+         << totalPages(longestChapter) << " pages." << endl;
+
+    // 3. Xoá một mục (Section 1.1)
+    if (deleteNode(bookRoot, "Section 1.1: Basics")) {
+        cout << "Section 1.1: Basics has been deleted." << endl;
+    } else {
+        cout << "Section not found." << endl;
+    }
+
+    cout << "After deletion, number of chapters: " << countChapters(bookRoot) << endl;
+
+    // Dọn dẹp bộ nhớ
+    delete chapter1;
+    delete section1_1;
+    delete subsection1_1_1;
+    delete chapter2;
+    delete section2_1;
+
+    return 0;
+}
