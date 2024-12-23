@@ -1,0 +1,153 @@
+#include <iostream>
+using namespace std;
+
+// Cấu trúc một node trong cây AVL
+struct Node {
+    int data;
+    Node* left;
+    Node* right;
+    int height;
+
+    Node(int value) {
+        data = value;
+        left = right = nullptr;
+        height = 1; // chiều cao ban đầu của node là 1
+    }
+};
+
+// Hàm tính chiều cao của một node
+int height(Node* node) {
+    if (node == nullptr) return 0;
+    return node->height;
+}
+
+// Hàm tính độ chênh lệch chiều cao của hai nhánh con
+int Heightdifference(Node* node) {
+    if (node == nullptr) return 0;
+    return height(node->left) - height(node->right);
+}
+
+// Hàm cập nhật chiều cao của node
+void updateHeight(Node* node) {
+    node->height = max(height(node->left), height(node->right)) + 1;
+}
+
+// Xoay phải (Right Rotation)
+Node* rightRotate(Node* y) {
+    Node* x = y->left;
+    Node* T2 = x->right;
+
+    // Thực hiện xoay
+    x->right = y;
+    y->left = T2;
+
+    // Cập nhật chiều cao
+    updateHeight(y);
+    updateHeight(x);
+
+    return x; // Trả về node mới (x)
+}
+
+// Xoay trái (Left Rotation)
+Node* leftRotate(Node* x) {
+    Node* y = x->right;
+    Node* T2 = y->left;
+
+    // Thực hiện xoay
+    y->left = x;
+    x->right = T2;
+
+    // Cập nhật chiều cao
+    updateHeight(x);
+    updateHeight(y);
+
+    return y; // Trả về node mới (y)
+}
+
+// Xoay trái phải (Left-Right Rotation)
+Node* leftRightRotate(Node* node) {
+    node->left = leftRotate(node->left);
+    return rightRotate(node);
+}
+
+// Xoay phải trái (Right-Left Rotation)
+Node* rightLeftRotate(Node* node) {
+    node->right = rightRotate(node->right);
+    return leftRotate(node);
+}
+
+// Hàm thêm một node vào cây AVL
+Node* insert(Node* node, int value) {
+    // Bước 1: Chèn node vào cây bình thường
+    if (node == nullptr) return new Node(value);
+
+    if (value < node->data)
+        node->left = insert(node->left, value);
+    else if (value > node->data)
+        node->right = insert(node->right, value);
+    else // Không chèn giá trị trùng
+        return node;
+
+    // Bước 2: Cập nhật chiều cao của node hiện tại
+    updateHeight(node);
+
+    // Bước 3: Kiểm tra độ cân bằng của node hiện tại và thực hiện các xoay cần thiết
+
+    int balance = Heightdifference(node);
+
+    // Cân bằng 1 - Xoay phải
+    if (balance > 1 && value < node->left->data)
+        return rightRotate(node);
+
+    // Cân bằng 2 - Xoay trái phải
+    if (balance > 1 && value > node->left->data)
+        return leftRightRotate(node);
+
+    // Cân bằng 3 - Xoay trái
+    if (balance < -1 && value > node->right->data)
+        return leftRotate(node);
+
+    // Cân bằng 4 - Xoay phải trái
+    if (balance < -1 && value < node->right->data)
+        return rightLeftRotate(node);
+
+    return node; // Trả về node không thay đổi
+}
+
+// Hàm in cây theo thứ tự duyệt trung (in-order)
+void inOrder(Node* root) {
+    if (root != nullptr) {
+        inOrder(root->left);
+        cout << root->data << " ";
+        inOrder(root->right);
+    }
+}
+
+// Hàm nhập dãy số và xây dựng cây AVL
+Node* createAVLTree(int arr[], int n) {
+    Node* root = nullptr;
+    for (int i = 0; i < n; i++) {
+        root = insert(root, arr[i]);
+    }
+    return root;
+}
+
+int main() {
+    int n;
+    cout << "Nhập số lượng phần tử trong dãy: ";
+    cin >> n;
+    int arr[n];
+
+    cout << "Nhập các phần tử trong dãy: ";
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+
+    Node* root = createAVLTree(arr, n);
+
+    cout << "Cây AVL sau khi chèn các phần tử là: ";
+    inOrder(root);
+    cout << endl;
+
+    return 0;
+}
