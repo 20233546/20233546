@@ -1,0 +1,200 @@
+
+                //CACH 1: SU DUNG MA TRAN LAN CAN
+
+#include <iostream>
+#include <queue>
+#include <stack>
+
+using namespace std;
+
+#define MAX_VERTICES 100
+
+// Khai báo ma trận lân cận
+int graph[MAX_VERTICES][MAX_VERTICES];
+
+// Hàm nhập đồ thị
+void inputGraphMatrix(int n, int m) {
+    // Khởi tạo ma trận lân cận với giá trị 0
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            graph[i][j] = 0;
+        }
+    }
+    
+    // Nhập các cạnh
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cout << "Nhập cạnh (u, v): ";
+        cin >> u >> v;
+        graph[u][v] = 1;
+        graph[v][u] = 1;  // Nếu là đồ thị vô hướng
+    }
+}
+
+// Duyệt đồ thị theo DFS (Tìm kiếm theo chiều sâu)
+void DFS(int u, bool visited[], int n) {
+    visited[u] = true;
+    cout << u << " ";
+    for (int v = 0; v < n; v++) {
+        if (graph[u][v] == 1 && !visited[v]) {
+            DFS(v, visited, n);
+        }
+    }
+}
+
+// Duyệt đồ thị theo BFS (Tìm kiếm theo chiều rộng)
+void BFS(int start, int n) {
+    bool visited[n];
+    for (int i = 0; i < n; i++) {
+        visited[i] = false;
+    }
+    
+    queue<int> q;
+    visited[start] = true;
+    q.push(start);
+    
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        cout << u << " ";
+        
+        for (int v = 0; v < n; v++) {
+            if (graph[u][v] == 1 && !visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cout << "Nhập số lượng đỉnh (n): ";
+    cin >> n;
+    cout << "Nhập số lượng cạnh (m): ";
+    cin >> m;
+    
+    inputGraphMatrix(n, m);
+
+    cout << "DFS bắt đầu từ đỉnh 0: ";
+    bool visited[MAX_VERTICES] = { false };
+    DFS(0, visited, n);
+    cout << endl;
+    
+    cout << "BFS bắt đầu từ đỉnh 0: ";
+    BFS(0, n);
+    cout << endl;
+    
+    return 0;
+}
+
+
+                // CACH 2: SU DUNG DANH SACH LAN CAN
+
+#include <iostream>
+#include <queue>
+#include <stack>
+
+using namespace std;
+
+#define MAX_VERTICES 100
+
+// Định nghĩa đồ thị là danh sách lân cận sử dụng mảng con trỏ
+struct Node {
+    int vertex;
+    Node* next;
+};
+
+class Graph {
+public:
+    int n;  // Số lượng đỉnh
+    Node* adjList[MAX_VERTICES];  // Mảng các danh sách lân cận
+    
+    Graph(int n) {
+        this->n = n;
+        for (int i = 0; i < n; i++) {
+            adjList[i] = nullptr;
+        }
+    }
+    
+    // Hàm thêm cạnh vào đồ thị
+    void addEdge(int u, int v) {
+        // Thêm v vào danh sách lân cận của u
+        Node* newNode = new Node();
+        newNode->vertex = v;
+        newNode->next = adjList[u];
+        adjList[u] = newNode;
+        
+        // Thêm u vào danh sách lân cận của v (đồ thị vô hướng)
+        newNode = new Node();
+        newNode->vertex = u;
+        newNode->next = adjList[v];
+        adjList[v] = newNode;
+    }
+    
+    // Duyệt đồ thị theo DFS (Tìm kiếm theo chiều sâu)
+    void DFS(int u, bool visited[]) {
+        visited[u] = true;
+        cout << u << " ";
+        Node* temp = adjList[u];
+        while (temp != nullptr) {
+            int v = temp->vertex;
+            if (!visited[v]) {
+                DFS(v, visited);
+            }
+            temp = temp->next;
+        }
+    }
+    
+    // Duyệt đồ thị theo BFS (Tìm kiếm theo chiều rộng)
+    void BFS(int start) {
+        bool visited[MAX_VERTICES] = { false };
+        queue<int> q;
+        visited[start] = true;
+        q.push(start);
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            cout << u << " ";
+            
+            Node* temp = adjList[u];
+            while (temp != nullptr) {
+                int v = temp->vertex;
+                if (!visited[v]) {
+                    visited[v] = true;
+                    q.push(v);
+                }
+                temp = temp->next;
+            }
+        }
+    }
+};
+
+int main() {
+    int n, m;
+    cout << "Nhập số lượng đỉnh (n): ";
+    cin >> n;
+    cout << "Nhập số lượng cạnh (m): ";
+    cin >> m;
+    
+    Graph g(n);
+    
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cout << "Nhập cạnh (u, v): ";
+        cin >> u >> v;
+        g.addEdge(u, v);
+    }
+    
+    cout << "DFS bắt đầu từ đỉnh 0: ";
+    bool visited[MAX_VERTICES] = { false };
+    g.DFS(0, visited);
+    cout << endl;
+    
+    cout << "BFS bắt đầu từ đỉnh 0: ";
+    g.BFS(0);
+    cout << endl;
+    
+    return 0;
+}
